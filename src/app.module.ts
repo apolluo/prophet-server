@@ -6,11 +6,10 @@ import { DbModule } from './db/db.module';
 //import { Db } from './db/db.providers';
 import { StoreModule } from './store/store.module';
 import { TagModule } from './tag/tag.module';
-import { TaController } from './ta/ta.controller';
 
 @Module({
   imports: [TaskModule, DbModule, StoreModule, TagModule],
-  controllers: [AppController, TaController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }

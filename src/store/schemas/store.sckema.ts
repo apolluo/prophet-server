@@ -9,10 +9,9 @@ import * as mongoose from 'mongoose';
 
 export const StoreSchema = new mongoose.Schema({
     //内容类型 1：文字；2：html格式；3：josn；4：图片；5：url
-    type:Number,
-    context:{type:String,required:true},
-    comefrom:String,
-    tags:[{type:mongoose.Schema.Types.ObjectId,ref:'Tag'}]
+    type: Number,
+    context: { type: String, required: true },
+    comefrom: String,
+    tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }]
 });
 // const StoreModel = mongoose.model('Store',StoreSchema)
- 

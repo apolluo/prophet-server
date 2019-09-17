@@ -6,4 +6,8 @@ export class CreateStoreDto {
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     @ApiModelProperty()
     readonly context: String;
+    @ApiModelProperty()
+    comefrom: String;
+    @ApiModelProperty()
+    tags: [String]
 }
