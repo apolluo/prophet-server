@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { TaskModule } from './task/task.module';
+import { StoreModule } from './store/store.module';
 
 async function bootstrap() {
   // Create your regular nest application.
@@ -19,13 +21,30 @@ async function bootstrap() {
 
   //await app.startAllMicroservicesAsync();
   const options = new DocumentBuilder()
-    .setTitle('Task example')
+    .setTitle('Prophet API')
+    .setDescription('The prophet API description')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api', app, document);
+
+  const taskOptions = new DocumentBuilder()
+    .setTitle('task example')
     .setDescription('The task API description')
     .setVersion('1.0')
     .addTag('task')
     .build();
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
-  await app.listen(3001);
+  const taskDocument = SwaggerModule.createDocument(app, taskOptions, { include: [TaskModule] });
+  SwaggerModule.setup('api/task', app, taskDocument);
+
+  const storeOptions = new DocumentBuilder()
+    .setTitle('store example')
+    .setDescription('The store API description')
+    .setVersion('1.0')
+    .addTag('store')
+    .build();
+  const storeDocument = SwaggerModule.createDocument(app, storeOptions, { include: [StoreModule] });
+  SwaggerModule.setup('api/store', app, storeDocument);
+  await app.listen(8081);
 }
 bootstrap();

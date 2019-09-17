@@ -1,0 +1,39 @@
+version: '2.0'
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - 8080:8080
+      - 80:80
+      - 443:443
+    volumes:
+      - ~/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ~/nginx/www:/usr/share/nginx/html
+      - ~/nginx/logs:/var/log/nginx
+    networks: ## 定义网络
+      - dev
+      #nn: ## 加入的网络的名称
+        #ipv4_address: 192.168.5.101 ## ipv4的ip地址
+  mongo-container:
+    image: mongo:3.4
+    container_name: mongodb
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=root
+        - MONGO_INITDB_ROOT_PASSWORD=123456
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/data/mongo:/data/db"
+      - "/data/mongo-entrypoint/:/docker-entrypoint-initdb.d/"
+    command: mongod
+   
+networks: ##定义网络组
+  dev: ## 网络组名称
+    #external: true  
+    driver: bridge ## 网络的模式
+    ipam: ## 配置网络
+      #driver: default
+      config:
+        - subnet: 172.16.238.0/24 ## ip地址网络 这里宿主机一般会是该网段的 192.168.5.1,所以不要设置自网段为1   
+      #gateway: 172.16.238.1     
