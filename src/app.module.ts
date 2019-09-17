@@ -6,9 +6,15 @@ import { DbModule } from './db/db.module';
 //import { Db } from './db/db.providers';
 import { StoreModule } from './store/store.module';
 import { TagModule } from './tag/tag.module';
+import { SourceModule } from './source/source.module';
+import { MongooseModule } from "@nestjs/mongoose";
+import { CrawlerModule } from './crawler/crawler.module';
 
 @Module({
-  imports: [TaskModule, DbModule, StoreModule, TagModule],
+  imports: [TaskModule, DbModule, StoreModule, TagModule, SourceModule,
+    MongooseModule.forRoot('mongodb://localhost/nest'),
+    CrawlerModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
