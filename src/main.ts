@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
+import * as  compression  from 'compression'
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { TaskModule } from './task/task.module';
 import { StoreModule } from './store/store.module';
+import { from } from 'rxjs';
 
 async function bootstrap() {
   // Create your regular nest application.
@@ -18,7 +20,7 @@ async function bootstrap() {
   //     queueOptions: { durable: false },
   //   },
   // });
-
+  app.use(compression())
   //await app.startAllMicroservicesAsync();
   const options = new DocumentBuilder()
     .setTitle('Prophet API')
