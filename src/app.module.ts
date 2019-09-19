@@ -12,7 +12,8 @@ import { CrawlerModule } from './crawler/crawler.module';
 import { RuleModule } from './rule/rule.module';
 
 @Module({
-  imports: [TaskModule, DbModule, StoreModule, TagModule, SourceModule,
+  imports: [
+    TaskModule, DbModule, StoreModule, TagModule, SourceModule,
     MongooseModule.forRoot('mongodb://localhost/nest'),
     CrawlerModule,
     RuleModule
