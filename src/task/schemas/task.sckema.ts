@@ -33,6 +33,8 @@ export const TaskSchema = new mongoose.Schema({
     status: Number,
     //任务是否结束
     complete: { type: Boolean, default: false },
-    createTime: Date,
-    updateTime: { type: Date, default: Date.now }
+    // createTime: Date,
+    // updateTime: { type: Date, default: Date.now }
+}, {
+    timestamps: true
 });

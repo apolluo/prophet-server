@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer'
 import { generateFileName, checkAndGenerateDir } from '@/util/file'
+import { CHROME_PATH } from '@/config';
 
 @Injectable()
 export class CrawlerService {
     private readonly logger = new Logger(CrawlerService.name)
     async crawlUrl(url) {
         if (!url) return;
-        const pathToExtension = '/usr/bin/google-chrome';
+        const pathToExtension = CHROME_PATH;
         const browser = await puppeteer.launch({
             headless: true,
             executablePath: pathToExtension,

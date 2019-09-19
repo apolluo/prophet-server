@@ -7,7 +7,7 @@ export const RuleSchema = new mongoose.Schema({
     desc: String,
     //先执行优先级 越大越优先 web规则(3000~3999) > Store|源规则(2000~2999) > 具体页面规则(1000~1999) > 具体内容规则(0~999)
     priority: Number,
-    //重要性  越大越优先  具体内容规则(3000~3999)>具体页面规则(1000~1999)  >Store|源规则(2000~2999)  > web规则(0~999)
+    //重要性  越大越优先  具体内容规则(3000~3999)>具体页面规则(2000~2999)  >Store|源规则(1000~1999)  > web规则(0~999)
     importance: Number,
     //获取范围
     scope: String,
@@ -19,8 +19,8 @@ export const RuleSchema = new mongoose.Schema({
     expression: String,
     //规则状态 0：未生效；1：正常；-1：异常；
     status: Number,
-    createTime: { type: Date, default: Date.now },
-    updateTime: { type: Date, default: Date.now }
+    // createTime: { type: Date, default: Date.now },
+    // updateTime: { type: Date, default: Date.now }
 }, {
-    collection: 'rule', versionKey: false
+    collection: 'rule', versionKey: false, timestamps: true
 });
