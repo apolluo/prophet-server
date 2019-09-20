@@ -1,12 +1,26 @@
 import { Document } from 'mongoose';
 
 export interface ISource extends Document {
-    //任务类型 1：抓包；2
+    //源类型 1：web；2:search engine; 3 file;
     type: Number,
-    //任务状态 0：未执行；1：执行成功；-1：执行错误；
+    //源状态 0：无法访问；1：正常；-1：解析错误；
     status: Number,
-    //任务是否结束
-    context: String,
-    createTime: Date,
-    updateTime: Date
+    domain: String,
+    //源地址 
+    src: String,
+    //API `http://www.baidu.com/s?ie=utf-8&wd=${key}`
+    searchApi: String,
+    searchParams: {
+        key: String,
+        value: String
+    },
+    //解析规则
+    parse: [String]
 }
+
+
+
+
+
+
+

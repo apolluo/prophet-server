@@ -7,10 +7,10 @@ export class CrawlerController {
     constructor(private readonly crawlerService: CrawlerService){
 
     }
-    @ApiImplicitQuery({name:'url', type:String})
-    @Get()
-    crawl( @Query('url') url){
-        return this.crawlerService.crawlUrl(url)
-    }
+    // @ApiImplicitQuery({name:'url', type:String})
+    // @Get()
+    // crawl( @Query('url') url){
+    //     return this.crawlerService.crawlUrl(url)
+    // }
 
 }

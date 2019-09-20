@@ -35,7 +35,7 @@ export class CreateTaskDto {
 
     //源
     @ApiModelProperty()
-    source: String
+    source: [String]
 
     //搜索方式 { name: 'searchType'  enum: ['Tag'  'Txt'  'Rule'] }
     @ApiModelProperty()
@@ -43,15 +43,15 @@ export class CreateTaskDto {
 
     //根据tag搜索
     @ApiModelProperty()
-    searchTag: String
+    searchTag: [String]
 
     //根据文字搜索
     @ApiModelProperty()
-    searchTxt: String
+    searchTxt: [String]
 
     //根据规则搜索  web规则、搜索引擎规则、源规则
     @ApiModelProperty()
-    searchRule: String
+    searchRule: [String]
 
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     @ApiModelProperty()

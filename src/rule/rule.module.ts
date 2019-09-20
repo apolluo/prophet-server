@@ -9,6 +9,7 @@ import { RuleSchema } from './schemas/rule.sckema';
     { name: 'Rule', schema: RuleSchema }
   ])],
   controllers: [RuleController],
-  providers: [RuleService]
+  providers: [RuleService],
+  exports:[RuleService]
 })
 export class RuleModule { }

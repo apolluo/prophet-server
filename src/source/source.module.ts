@@ -11,6 +11,7 @@ import { SourceSchema } from './schemas/source.sckema';
     ])
   ],
   providers: [SourceService],
-  controllers: [SourceController]
+  controllers: [SourceController],
+  exports:[SourceService]
 })
 export class SourceModule { }

@@ -26,7 +26,7 @@ export const TaskSchema = new mongoose.Schema({
     //根据tag搜索
     searchTag: [{ type: ObjectId, ref: 'Tag' }],
     //根据文字搜索
-    searchTxt: String,
+    searchTxt: [String],
     //根据规则搜索  web规则、搜索引擎规则、源规则
     searchRule: [{ type: ObjectId, ref: 'Rule' }],
     //任务状态 0：未执行；1：执行成功；-1：执行错误；

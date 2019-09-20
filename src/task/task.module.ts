@@ -4,9 +4,10 @@ import { TaskController } from './task.controller';
 import { TaskProviders } from './task.providers';
 import { DbModule } from '../db/db.module';
 import { CrawlerModule } from '@/crawler/crawler.module';
+import { RuleModule } from '@/rule/rule.module';
 
 @Module({
-  imports: [DbModule, CrawlerModule],
+  imports: [DbModule, CrawlerModule,RuleModule],
   providers: [TaskService, ...TaskProviders],
   controllers: [TaskController]
 })

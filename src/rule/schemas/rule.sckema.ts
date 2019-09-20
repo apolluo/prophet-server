@@ -18,9 +18,7 @@ export const RuleSchema = new mongoose.Schema({
     //规则表达式
     expression: String,
     //规则状态 0：未生效；1：正常；-1：异常；
-    status: Number,
-    // createTime: { type: Date, default: Date.now },
-    // updateTime: { type: Date, default: Date.now }
+    status: Number
 }, {
     collection: 'rule', versionKey: false, timestamps: true
 });
