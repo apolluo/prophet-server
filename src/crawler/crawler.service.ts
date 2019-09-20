@@ -37,7 +37,7 @@ export class CrawlerService {
         
         
         await this.browser.close()
-        console.log(this.browser)
+        //console.log(this.browser)
         this.logger.log('close chrome')
     }
     
