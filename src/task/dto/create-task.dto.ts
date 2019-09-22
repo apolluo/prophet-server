@@ -53,6 +53,14 @@ export class CreateTaskDto {
     @ApiModelProperty()
     searchRule: [String]
 
+    //根据请求参数搜索
+    @ApiModelProperty()
+    searchParams: Object
+
+    //根据关键词搜索
+    @ApiModelProperty()
+    searchWd: String
+
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     @ApiModelProperty()
     status: Number

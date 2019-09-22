@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { ObjectId } from 'bson';
 //爬次数 爬方式 爬内容 爬时间 爬的源
 export const RuleSchema = new mongoose.Schema({
     //规则类型 {name:'type',enum:['web规则','Store规则', '源规则','具体页面规则','具体内容规则']}
@@ -11,14 +12,16 @@ export const RuleSchema = new mongoose.Schema({
     importance: Number,
     //获取范围
     scope: String,
-    //获取目标
+    //目标名称
     target: String,
-    //目标类型 ['html','DOM','TXT','JS','API','TAG']
+    //目标类型 ['PROP','DOM','TXT','JS','API','TAG']
     targetType: Number,
-    //规则表达式
+    //规则表达式 querySelectorAll: All(expression)
     expression: String,
+    children: [{ type: ObjectId, ref: 'Rule' }],
     //规则状态 0：未生效；1：正常；-1：异常；
     status: Number
 }, {
     collection: 'rule', versionKey: false, timestamps: true
 });
+

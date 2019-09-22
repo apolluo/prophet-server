@@ -9,10 +9,10 @@ import { RuleService } from '@/rule/rule.service';
 @Controller('task')
 export class TaskController {
     constructor(
-        private readonly taskService: TaskService, 
+        private readonly taskService: TaskService,
         private readonly crawlerService: CrawlerService,
-        private readonly ruleService:RuleService
-        ) {
+        private readonly ruleService: RuleService
+    ) {
 
     }
     @Post()
@@ -20,7 +20,7 @@ export class TaskController {
         this.taskService.create(createTaskDto).then(
             (res) => {
                 console.log(res)
-               return this.crawlerService.crawl(createTaskDto.source)
+                return this.crawlerService.crawl(createTaskDto)
             }
         ).catch((e) => { console.log('error', e) })
 

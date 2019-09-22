@@ -28,6 +28,9 @@ export class CreateRuleDto {
     //规则状态 0：未生效；1：正常；-1：异常；
     @ApiModelProperty()
     readonly status: Number;
+
+    @ApiModelProperty()
+    readonly children: [String]
     // @ApiModelProperty()
     // readonly createTime: Date;
     // @ApiModelProperty()

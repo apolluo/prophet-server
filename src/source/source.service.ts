@@ -6,7 +6,7 @@ import { ISource } from './interfaces/source.interface';
 
 @Injectable()
 export class SourceService {
-    private logger= new Logger(SourceService.name)
+    private logger = new Logger(SourceService.name)
     constructor(@InjectModel('Source') private readonly SourceModel: Model<ISource>) {
 
     }
@@ -17,16 +17,22 @@ export class SourceService {
     async findAll() {
         return await this.SourceModel.find({})
     }
-    async findByIds(sourceIds, callback){
-        this.logger.log('findByIds',sourceIds)
+    async findByIds(sourceIds, callback) {
+        this.logger.log('findByIds', sourceIds)
         return await this.SourceModel.find({
-            _id:{$in:sourceIds}
+            _id: { $in: sourceIds }
         })
-        .populate('parse')
-        .exec(function (err, source) {
-            if (err)  console.log(err);
-            console.log(source);
-            callback(source) ;
-          });
+            .populate('parse')
+            .populate({
+                path: 'children',
+                populate: { path: 'children' }
+            })
+            .exec(function (err, source) {
+                if (err) {
+                    console.log(err);
+                }
+                console.log(source);
+                callback(source);
+            });
     }
 }

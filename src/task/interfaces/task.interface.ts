@@ -27,6 +27,10 @@ export interface ITask extends Document {
     searchTxt: [String],
     //根据规则搜索  web规则、搜索引擎规则、源规则
     searchRule: [String],
+    //根据请求参数搜索
+    searchParams: Object,
+    //根据关键词搜索
+    searchWd: String,
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     status: Number
 }

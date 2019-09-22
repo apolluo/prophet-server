@@ -27,8 +27,8 @@ export interface IRule extends Document {
     //规则表达式
     expression: String,
     //规则状态 0：未生效；1：正常；-1：异常；
-
     status: Number,
+    children: [String],
 
     createTime?: Date,
     updateTime?: Date,

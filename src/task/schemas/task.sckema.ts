@@ -21,7 +21,7 @@ export const TaskSchema = new mongoose.Schema({
     link: String,
     //源
     source: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Source' }],
-    //搜索方式 { name: 'searchType', enum: ['Tag', 'Txt', 'Rule'] }
+    //搜索方式 { name: 'searchType', enum: ['Tag', 'Txt', 'Rule','params','wd'] }
     searchType: Number,
     //根据tag搜索
     searchTag: [{ type: ObjectId, ref: 'Tag' }],
@@ -29,12 +29,14 @@ export const TaskSchema = new mongoose.Schema({
     searchTxt: [String],
     //根据规则搜索  web规则、搜索引擎规则、源规则
     searchRule: [{ type: ObjectId, ref: 'Rule' }],
+    //根据请求参数搜索
+    searchParams: Object,
+    //根据关键词搜索
+    searchWd: String,
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     status: Number,
     //任务是否结束
-    complete: { type: Boolean, default: false },
-    // createTime: Date,
-    // updateTime: { type: Date, default: Date.now }
+    complete: { type: Boolean, default: false }
 }, {
     timestamps: true
 });
