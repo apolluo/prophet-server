@@ -21,23 +21,17 @@ export class SourceService {
         this.logger.log('findByIds', sourceIds)
         return await this.SourceModel.find({
             _id: { $in: sourceIds }
-        })
-            .populate({
-                path:'parse',
-                populate: { 
-                    path: 'children',
-                    populate: { 
-                        path: 'children' 
-                    } 
+        }).populate({
+            path: 'parse',
+            populate: {
+                path: 'children',
+                populate: {
+                    path: 'children'
                 }
-            })
-            // .populate({
-            //     path: 'parse.children',
-            //     populate: { path: 'children' }
-            // })
-            .exec()
+            }
+        }).exec()
     }
-    async update(id,dto){
+    async update(id, dto) {
         return await this.SourceModel.update({ _id: id }, { $set: dto })
     }
 }

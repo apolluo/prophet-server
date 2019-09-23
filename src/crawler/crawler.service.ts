@@ -32,7 +32,7 @@ export class CrawlerService {
         let sourceIds = taskDto.source
         console.log('sourceIds', sourceIds)
         const crawlSources = async sources => {
-            console.log(sources)
+            console.log('sources', sources)
             await sources.forEach(
                 async (source, index) => {
                     await this.crawlSource(source, taskDto, index)
@@ -41,8 +41,7 @@ export class CrawlerService {
             // //console.log(this.browser)
             // this.logger.log('close chrome')
         }
-        let sources= await this.sourceSevice.findByIds(sourceIds)
-        crawlSources(sources)
+        this.sourceSevice.findByIds(sourceIds).then(crawlSources)
     }
 
     async crawlSource(source: ISource, taskDto, index) {
@@ -70,61 +69,94 @@ export class CrawlerService {
         this.logger.log('打开 chrome')
         this.page = await this.browser.newPage()
         await this.page.goto(url, { waitUntil: 'networkidle0' })
-        // let file = await generateFileName(url);
-        // if (file.error) {
-        //     this.logger.log(file.error);
-        //     return
-        // }
-        // this.logger.log(file.path)
-        // await checkAndGenerateDir(file.path);
-        // await this.page.screenshot({ path: file.png })
+
 
         let results = await this.page.evaluate((rules) => {
-            let pageInfo = {}
+            let pageInfo = {
+                name: 'root',
+                target: document
+            }
             let errors = []
-            const applyRule = (rule) => {
-                switch (rule.targetType) {
-                    case 0:
-
-                        break;
-                    case 1:
-                        let ruleParse = rule.expression.match(/All\((.+)\)/)
-                        let expression, isAll, selector
-                        if (ruleParse) {
-                            isAll = true
-                            expression = ruleParse[1]
-                            selector = 'querySelectorAll'
-                        } else {
-                            expression = rule.expression
-                            selector = 'querySelector'
-                        }
-
-                        if (rule.scope) {
-                            if (pageInfo[rule.scope]) {
-                                if (pageInfo[rule.scope].length) {
-                                    pageInfo[rule.scope].forEach(item => {
-                                        item[rule.target] = item[selector](rule.expression)
-                                    });
-                                } else {
-                                    pageInfo[rule.scope][rule.target] = pageInfo[rule.scope][selector](rule.expression)
-                                }
-                            } else {
-                                errors.push(`The scope of ${rule.scope} is not exist`)
-                            }
-                        } else {
-                            pageInfo[rule.target] = document[selector](rule.expression)
-                        }
-                        if (!pageInfo[rule.target].length) {
-                            errors.push(`The target of ${rule.target} is not exist`)
-                        }
-
-                        break;
-                    case 2:
-                        break;
-                    case 3:
-                        pageInfo[rule.target] = eval(rule.expression)
-                        break;
+            let outputs = []
+            const applyRule = (rule, scope = { name: 'root' }) => {
+                console.log(rule, scope)
+                let father, selector, output = {}
+                if (scope.name !== 'root') {
+                    father = scope
+                } else {
+                    father = pageInfo
                 }
+                if (!father) {
+                    errors.push(`The scope of ${scope} is not exist`)
+                    return errors;
+                }
+                let addRuleChild = (father, child) => {
+                    if (!father.ruleChildren) father.ruleChildren = []
+                    father.ruleChildren.push(child)
+                }
+
+                let parseExpressWithTarget = (target) => {
+                    switch (rule.targetType) {
+                        //prop
+                        case 0:
+                            // father.ruleChild={
+                            //     name:rule.target,
+                            //     type:rule.targetType,
+                            //     target:father.target[rule.expression] || father.target.getAttribute(rule.expression)
+                            // }
+                            addRuleChild(target, {
+                                name: rule.target,
+                                type: rule.targetType,
+                                target: target[rule.expression] || target.getAttribute(rule.expression)
+                            })
+                            break;
+                        case 1:
+                            selector = 'querySelector'
+                        case 2:
+                            if (!selector) {
+                                selector = 'querySelectorAll'
+                            }
+                            let getDom = (fatherDom, expression) => {
+                                let dom
+                                if (fatherDom && fatherDom[selector]) {
+                                    dom = fatherDom[selector](expression)
+                                } else {
+                                    dom = document[selector](expression)
+                                }
+                                if ((selector === 'querySelector' && dom) || (selector === 'querySelectorAll' && dom.length == 0)) {
+                                    errors.push(`The target of ${rule.target} is not exist`)
+                                }
+                                if(selector === 'querySelectorAll'){
+                                    dom=Array.apply(null, dom)
+                                }
+                                return dom
+                            }
+                            let currentTarget = {
+                                name: rule.target,
+                                type: rule.targetType,
+                                target: getDom(target, rule.expression)
+                            }
+                            addRuleChild(target, currentTarget)
+                            if (rule.children) {
+                                rule.children.forEach(childRule => {
+                                    applyRule(childRule, currentTarget)
+                                });
+                            }
+                            break;
+                        case 3:
+                            pageInfo[rule.target] = eval(rule.expression)
+                            break;
+                    }
+                }
+
+                if (father.target && Array.isArray(father.target)) {
+                    father.target.forEach(target => {
+                        parseExpressWithTarget(target)
+                    });
+                } else {
+                    parseExpressWithTarget(father.target)
+                }
+
             }
             rules.forEach(rule => {
                 applyRule(rule)
@@ -137,6 +169,16 @@ export class CrawlerService {
         //console.log(this.browser)
         this.logger.log('close chrome')
 
+    }
+    async generatePng() {
+        // let file = await generateFileName(url);
+        // if (file.error) {
+        //     this.logger.log(file.error);
+        //     return
+        // }
+        // this.logger.log(file.path)
+        // await checkAndGenerateDir(file.path);
+        // await this.page.screenshot({ path: file.png })
     }
     async generatePdf() {
         //await page.goto('data:text/html,' + html,{waitUntil:'networkidle2'})
