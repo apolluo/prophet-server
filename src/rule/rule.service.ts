@@ -16,6 +16,14 @@ export class RuleService {
     async findAll() {
         return await this.RuleModel.find({})
     }
+    async findByIds(ids){
+        return await this.RuleModel.find({
+            _id:{$in:ids}
+        }).populate({
+            path:'children',
+            populate:{path:'children'}
+        }).exec()
+    }
     async update(id, dto) {
         return await this.RuleModel.update({ _id: id }, { $set: dto })
     }

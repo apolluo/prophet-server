@@ -17,22 +17,27 @@ export class SourceService {
     async findAll() {
         return await this.SourceModel.find({})
     }
-    async findByIds(sourceIds, callback) {
+    async findByIds(sourceIds) {
         this.logger.log('findByIds', sourceIds)
         return await this.SourceModel.find({
             _id: { $in: sourceIds }
         })
-            .populate('parse')
             .populate({
-                path: 'children',
-                populate: { path: 'children' }
-            })
-            .exec(function (err, source) {
-                if (err) {
-                    console.log(err);
+                path:'parse',
+                populate: { 
+                    path: 'children',
+                    populate: { 
+                        path: 'children' 
+                    } 
                 }
-                console.log(source);
-                callback(source);
-            });
+            })
+            // .populate({
+            //     path: 'parse.children',
+            //     populate: { path: 'children' }
+            // })
+            .exec()
+    }
+    async update(id,dto){
+        return await this.SourceModel.update({ _id: id }, { $set: dto })
     }
 }

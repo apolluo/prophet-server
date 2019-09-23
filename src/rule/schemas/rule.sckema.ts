@@ -14,7 +14,7 @@ export const RuleSchema = new mongoose.Schema({
     scope: String,
     //目标名称
     target: String,
-    //目标类型 ['PROP','DOM','TXT','JS','API','TAG']
+    //目标类型 ['PROP','DOM','DOM_LIST','JS','API','TAG','TXT',]
     targetType: Number,
     //规则表达式 querySelectorAll: All(expression)
     expression: String,

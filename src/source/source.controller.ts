@@ -2,6 +2,7 @@ import { Controller, Get, Put, Body, Post, Param, Logger, Query } from '@nestjs/
 import { SourceService } from './source.service';
 import { ApiUseTags, ApiOperation, ApiImplicitParam, ApiImplicitQuery } from '@nestjs/swagger';
 import { CreateSourceDto } from './dto/create-source.dto';
+import { identifier } from '@babel/types';
 
 @ApiUseTags('source')
 @Controller('source')
@@ -19,41 +20,9 @@ export class SourceController {
         collectionFormat: 'multi'
     })
     //@ApiImplicitParams({ name: "ids", type: [], description: 'source id array' })
-    async getSourceByIds(@Query('ids') ids) {
+    getSourceByIds(@Query('ids') ids) {
         this.logger.log(ids)
-        let res;
-        let resP
-        const callback = source => {
-            //return source
-            res = {
-                source,
-                code: 200
-            }
-            // resP = new Promise((resolve, reject) => {
-            //     if (res) {
-            //         return resolve(res)
-            //     } else {
-            //         return reject()
-            //     }
-            // })
-            // return  resP
-            //resP.resolve(res)
-        }
-
-        await this.sourceService.findByIds(ids, callback)
-        this.logger.log(JSON.stringify(res))
-        return res
-        // let resP = new Promise((resolve, reject) => {
-        //     if (res) {
-        //         resolve(res)
-        //     } else {
-        //         reject('error')
-        //     }
-        // })
-        // return callback.then((res) => {
-        //     return res
-        // })
-        //return callback;
+        return this.sourceService.findByIds(ids)
     }
     @Get()
     getSource() {
@@ -63,5 +32,11 @@ export class SourceController {
     @Post()
     addSource(@Body() createSourceDto: CreateSourceDto) {
         return this.sourceService.create(createSourceDto)
+    }
+    @ApiOperation({title:'根据id修改源'})
+    @ApiImplicitParam({name:'id',description:'要修改的源id'})
+    @Put(':id')
+    updateSource(@Param('id') id, @Body() dto: CreateSourceDto){
+        return this.sourceService.update(id, dto)
     }
 }

@@ -1,9 +1,10 @@
-import { Controller, Get, Put, Body, Post, Param, Delete } from '@nestjs/common';
-import { ApiUseTags, ApiImplicitParam, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Put, Body, Post, Param, Delete, Query } from '@nestjs/common';
+import { ApiUseTags, ApiImplicitParam, ApiOperation, ApiImplicitQuery } from '@nestjs/swagger';
 import { RuleService } from './rule.service';
 import { CreateRuleDto } from './dto/create-rule.dto';
 import { identifier } from '@babel/types';
 import { UpdateRuleDto } from './dto/update-rule.dto';
+import { isDeepStrictEqual } from 'util';
 
 @ApiUseTags('rule')
 @Controller('rule')
@@ -14,6 +15,19 @@ export class RuleController {
     @Post()
     addRule(@Body() dto: CreateRuleDto) {
         return this.ruleService.create(dto)
+    }
+
+    @ApiOperation({ title: "根据ids查找填充好的规则" })
+    @ApiImplicitQuery({
+        name: "ids",
+        description: 'rule id',
+        required: true,
+        isArray: true,
+        collectionFormat: 'multi'
+    })
+    @Get('/query')
+    findByIds(@Query('ids') ids) {
+        return this.ruleService.findByIds(ids)
     }
 
     @Get()

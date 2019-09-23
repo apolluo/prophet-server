@@ -41,7 +41,8 @@ export class CrawlerService {
             // //console.log(this.browser)
             // this.logger.log('close chrome')
         }
-        await this.sourceSevice.findByIds(sourceIds, crawlSources)
+        let sources= await this.sourceSevice.findByIds(sourceIds)
+        crawlSources(sources)
     }
 
     async crawlSource(source: ISource, taskDto, index) {
