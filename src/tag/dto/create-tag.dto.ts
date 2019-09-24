@@ -5,7 +5,19 @@ export class CreateTagDto {
     readonly type: Number;
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     @ApiModelProperty()
-    readonly label:String;
+    readonly label: String;
+
+    //判断方式
     @ApiModelProperty()
-    readonly stores:[String]
+    readonly match: [String]
+
+    //所属根TAG，如果没有，则为根TAG
+    @ApiModelProperty()
+    readonly root: String
+
+    @ApiModelProperty()
+    readonly children: [String]
+
+    @ApiModelProperty()
+    readonly stores: [String]
 }
