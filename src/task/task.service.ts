@@ -18,4 +18,7 @@ export class TaskService {
         return await this.TaskModel.find().exec();
     }
 
+    async update(id,dto):Promise<ITask>{
+        return await this.TaskModel.update({_id:id},{$set:dto})
+    }
 }

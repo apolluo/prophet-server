@@ -27,21 +27,66 @@ export class CrawlerService {
         this.logger.log('打开 chrome')
         this.page = await this.browser.newPage()
     }
-    async crawl(taskDto: CreateTaskDto) {
+    private getPageInfo(root) {
+        let extract = (node) => {
+            let nodeData:any={}
+            if(typeof node=="string"){
+                return node
+            }else if(node.ruleChildren){
+                nodeData=[]
+                node.ruleChildren.forEach(child=>{
+                    nodeData.push(extract(child))
+                })
+            }else if(typeof node.target=='string'){
+                return  node.target
+            }else if (node.target.ruleChildren) {
+                if(Array.isArray(node.target.ruleChildren)){
+                    nodeData[node.name]= {}
+                    node.target.ruleChildren.forEach(child => {
+                        //nodeData[node.name].push(extract(child))
+                        nodeData[node.name][child.name]=extract(child)
+                    });
+                }else{
+                    //nodeData[node.name].push(extract(node.target.ruleChildren ))
+                }
+            }else if(Array.isArray(node.target)){
+                nodeData=[]
+                node.target.forEach(item=>{
+                    nodeData.push(extract(item))
+                })
+            }
+            return nodeData
+        }
+        let res = extract(root)
+        console.log(res)
+        return res
+    }
+    async crawl(taskDto) {
         //await this.init()
         let sourceIds = taskDto.source
         console.log('sourceIds', sourceIds)
+        console.log(taskDto)
         const crawlSources = async sources => {
             console.log('sources', sources)
-            await sources.forEach(
-                async (source, index) => {
-                    await this.crawlSource(source, taskDto, index)
-                })
+            let crawPromises=[],that=this
+            for(var i=0;i<sources.length;i++){
+                crawPromises.push(that.crawlSource(sources[i], taskDto, i)) 
+            }
+            return Promise.all(crawPromises)
+            // return await sources.forEach(
+            //     async (source, index) => {
+            //         await this.crawlSource(source, taskDto, index)
+            //     })
             // await this.browser.close()
             // //console.log(this.browser)
             // this.logger.log('close chrome')
         }
-        this.sourceSevice.findByIds(sourceIds).then(crawlSources)
+        return await this.sourceSevice.findByIds(sourceIds)
+        .then(crawlSources)
+        .then((res)=>{
+            console.log('crawlSources then',res)
+            return res
+        })
     }
 
     async crawlSource(source: ISource, taskDto, index) {
@@ -57,7 +102,7 @@ export class CrawlerService {
                 break;
         }
         if (!url) return;
-        this.crwalUrl(url, source.parse)
+        return this.crwalUrl(url, source.parse)
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
@@ -70,14 +115,13 @@ export class CrawlerService {
         this.page = await this.browser.newPage()
         await this.page.goto(url, { waitUntil: 'networkidle0' })
 
-
         let results = await this.page.evaluate((rules) => {
             let pageInfo = {
                 name: 'root',
                 target: document
             }
             let errors = []
-            let outputs = []
+            let outputs = {}
             const applyRule = (rule, scope = { name: 'root' }) => {
                 console.log(rule, scope)
                 let father, selector, output = {}
@@ -126,8 +170,8 @@ export class CrawlerService {
                                 if ((selector === 'querySelector' && dom) || (selector === 'querySelectorAll' && dom.length == 0)) {
                                     errors.push(`The target of ${rule.target} is not exist`)
                                 }
-                                if(selector === 'querySelectorAll'){
-                                    dom=Array.apply(null, dom)
+                                if (selector === 'querySelectorAll') {
+                                    dom = Array.apply(null, dom)
                                 }
                                 return dom
                             }
@@ -143,8 +187,20 @@ export class CrawlerService {
                                 });
                             }
                             break;
+                        //JS    
                         case 3:
-                            pageInfo[rule.target] = eval(rule.expression)
+                            let currentJSTarget = {
+                                name: rule.target,
+                                type: rule.targetType,
+                                target: eval(rule.expression)
+                            }
+                            addRuleChild(target, currentJSTarget)
+                            if (rule.children) {
+                                rule.children.forEach(childRule => {
+                                    applyRule(childRule, currentJSTarget)
+                                });
+                            }
+                            //pageInfo[rule.target] = eval(rule.expression)
                             break;
                     }
                 }
@@ -165,10 +221,11 @@ export class CrawlerService {
 
         }, rules)
         console.log(results)
-        //await this.browser.close()
-        //console.log(this.browser)
+        let parseResults=this.getPageInfo(results)
+        console.log(parseResults)
+        await this.browser.close()
         this.logger.log('close chrome')
-
+        return parseResults
     }
     async generatePng() {
         // let file = await generateFileName(url);
