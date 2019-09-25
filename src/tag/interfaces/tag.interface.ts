@@ -5,7 +5,7 @@ export interface ITag extends Document {
     type: Number,
     label: String,
     //判断方式
-    match: [String],
+    match: String,
     //所属根TAG，如果没有，则为根TAG
     root: String,
     children: [String],

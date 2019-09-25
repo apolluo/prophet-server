@@ -8,13 +8,15 @@ import { SourceService } from '@/source/source.service';
 import { async } from 'rxjs/internal/scheduler/async';
 import { ITask } from '@/task/interfaces/task.interface';
 import { CreateTaskDto } from '@/task/dto/create-task.dto';
+import { TagService } from '@/tag/tag.service';
 
 @Injectable()
 export class CrawlerService {
     private readonly logger = new Logger(CrawlerService.name)
     private browser
     private page
-    constructor(private readonly sourceSevice: SourceService) {
+    constructor(private readonly sourceService: SourceService,
+        private readonly tagService:TagService) {
 
     }
     private async init() {
@@ -33,9 +35,10 @@ export class CrawlerService {
             if(typeof node=="string"){
                 return node
             }else if(node.ruleChildren){
-                nodeData=[]
+                //nodeData=[]
                 node.ruleChildren.forEach(child=>{
-                    nodeData.push(extract(child))
+                    nodeData=extract(child)
+                    //nodeData.push(extract(child))
                 })
             }else if(typeof node.target=='string'){
                 return  node.target
@@ -61,6 +64,7 @@ export class CrawlerService {
         console.log(res)
         return res
     }
+    //爬任务，爬多个源
     async crawl(taskDto) {
         //await this.init()
         let sourceIds = taskDto.source
@@ -81,14 +85,14 @@ export class CrawlerService {
             // //console.log(this.browser)
             // this.logger.log('close chrome')
         }
-        return await this.sourceSevice.findByIds(sourceIds)
+        return await this.sourceService.findByIds(sourceIds)
         .then(crawlSources)
         .then((res)=>{
             console.log('crawlSources then',res)
             return res
         })
     }
-
+    //爬某个源/网页
     async crawlSource(source: ISource, taskDto, index) {
         let url;
         switch (source.type) {
@@ -102,7 +106,13 @@ export class CrawlerService {
                 break;
         }
         if (!url) return;
-        return this.crwalUrl(url, source.parse)
+        let crawlSourceRes=this.crwalUrl(url, source.parse)
+        if(!source.crawlMore){
+            return crawlSourceRes
+        }else if(source.crawlMore==1){
+
+        }
+        
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
@@ -118,7 +128,8 @@ export class CrawlerService {
         let results = await this.page.evaluate((rules) => {
             let pageInfo = {
                 name: 'root',
-                target: document
+                target: document,
+                innerText:''
             }
             let errors = []
             let outputs = {}
@@ -217,10 +228,14 @@ export class CrawlerService {
             rules.forEach(rule => {
                 applyRule(rule)
             })
+            pageInfo.innerText=document.body.innerText
             return pageInfo
 
         }, rules)
-        console.log(results)
+        
+        console.log('innerText', results.innerText)
+        let tags = await this.tagService.getTags(results.innerText)
+        console.log(tags)
         let parseResults=this.getPageInfo(results)
         console.log(parseResults)
         await this.browser.close()

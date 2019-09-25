@@ -12,12 +12,10 @@ export const SourceSchema = new mongoose.Schema({
     src: String,
     //API '`http://www.baidu.com/s?ie=utf-8&wd=${searchParams.wd}`'
     searchApi: String,
-    // searchParams:{
-    //     key:String,
-    //     value:String
-    // },
     //解析规则
-    parse: [{ type: ObjectId, ref: 'Rule' }]
+    parse: [{ type: ObjectId, ref: 'Rule' }],
+    //爬详细 0:不爬；1爬并按TAG保存 
+    crawlMore:Number
 }, {
     collection: 'source', versionKey: false, timestamps: true
 });

@@ -9,7 +9,7 @@ export class CreateTagDto {
 
     //判断方式
     @ApiModelProperty()
-    readonly match: [String]
+    readonly match: String
 
     //所属根TAG，如果没有，则为根TAG
     @ApiModelProperty()

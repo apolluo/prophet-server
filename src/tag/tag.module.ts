@@ -7,6 +7,7 @@ import { DbModule } from '../db/db.module';
 @Module({
   imports: [DbModule],
   providers: [TagService, ...TagProviders],
-  controllers: [TagController]
+  controllers: [TagController],
+  exports:[TagService]
 })
 export class TagModule { }

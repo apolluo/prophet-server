@@ -15,7 +15,9 @@ export interface ISource extends Document {
         value: String
     },
     //解析规则
-    parse: [String]
+    parse: [String],
+    //爬详细 0:不爬；1爬并按TAG保存 
+    crawlMore:Number
 }
 
 

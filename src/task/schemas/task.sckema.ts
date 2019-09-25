@@ -36,7 +36,8 @@ export const TaskSchema = new mongoose.Schema({
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     status: Number,
     //任务是否结束
-    complete: { type: Boolean, default: false }
+    complete: { type: Boolean, default: false },
+    
 }, {
     timestamps: true
 });

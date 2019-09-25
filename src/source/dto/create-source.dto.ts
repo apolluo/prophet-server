@@ -23,5 +23,8 @@ export class CreateSourceDto {
     //解析规则
     @ApiModelProperty()
     readonly parse: [String]
+    //爬详细 0:不爬；1爬并按TAG保存 
+    @ApiModelProperty()
+    readonly crawlMore:Number
     
 }

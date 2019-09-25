@@ -14,7 +14,23 @@ export class TagService {
         return await createdTag.save();
     }
     async findAll() {
-        return this.TagModel.find().exec()
+        return await this.TagModel.find().exec()
+    }
+    async update(id,dto){
+        return await this.TagModel.update({_id:id},{$set:dto})
+    }
+    async getTags(content:string){
+        let res=[]
+        let tags= await this.findAll()
+        //console.log(tags)
+        tags.forEach(tag=>{
+            if(!tag.match)return;
+            //console.log(tag)
+           if( new RegExp(tag.match.toString(),'ig').test(content)){
+               res.push(tag)
+           }
+        })
+        return res
     }
 
 }
