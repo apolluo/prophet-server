@@ -63,5 +63,30 @@ const recognize = (rule, target, compTarget) => {
   })
 }
 // 获取主要区域的链接，按路径XPATH?分类，数量最多，字体最大的即为列表，
+// 机器学习特征 字体大小 数量 是否在main
 let mainContent = recognize(MAIN)
-mainContent.querySelectorsAll
+let allLink = mainContent.querySelectorAll('a')
+let linkList
+// 是否兄弟
+const LIST = {
+  font
+}
+function getstyle (obj, key) {
+  if (obj.currentStyle) {
+    return obj.currentStyle[key]
+  } else {
+    return getComputedStyle(obj, false)[key]
+  }
+}
+const isSibling = (rule, target, compTarget) => {}
+const recognizeList = dom => {
+  let parent = dom.parentNode
+  let tag = dom.tagName.toLowerCase()
+  if (parent === document.body) {
+    return
+  }
+  let siblings = parent.getElementsByTag(tag)
+  // 是否有兄弟
+  if (siblings.length > 1) {
+  }
+}
