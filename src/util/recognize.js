@@ -62,3 +62,6 @@ const recognize = (rule, target, compTarget) => {
     recognize(rule, currentItem)
   })
 }
+// 获取主要区域的链接，按路径XPATH?分类，数量最多，字体最大的即为列表，
+let mainContent = recognize(MAIN)
+mainContent.querySelectorsAll
