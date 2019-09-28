@@ -80,7 +80,7 @@ let allLink = mainContent.querySelectorAll('a')
 let linkList
 // 是否兄弟
 const LIST = ['font', 'className']
-function getstyle(obj, key) {
+function getstyle (obj, key) {
   if (obj.currentStyle) {
     return obj.currentStyle[key]
   } else {
@@ -94,17 +94,17 @@ var isSibling = (rules, target, compTarget) => {
         if (getstyle(target, rule) !== getstyle(compTarget, rule)) {
           return false
         }
-        break;
+        break
       case 'className':
         if (target.className !== compTarget.className) {
           return false
         }
-        break;
+        break
     }
   }
   return true
 }
-var recognizeBlock = (block) => {
+var recognizeBlock = block => {
   let links = recognizeLink(block)
   let title, href, title2
   if (!links.length) {
@@ -119,14 +119,13 @@ var recognizeBlock = (block) => {
     title = title2 ? title2.innerText : title.innerText
   }
 
-
   return {
     title,
     href,
     block
   }
 }
-var recognizeListBlock = (dom) => {
+var recognizeListBlock = dom => {
   let parent = dom.parentNode
   let tag = dom.tagName.toLowerCase()
   if (parent === document.body) {
@@ -139,11 +138,11 @@ var recognizeListBlock = (dom) => {
   if (siblings.length > 1) {
     for (var sibling of siblings) {
       if (sibling.tagName.toLowerCase() !== tag) {
-        continue;
+        continue
       }
       if (sibling === dom) {
         blockList.push(recognizeBlock(sibling))
-        continue;
+        continue
       }
       if (isSibling(LIST, sibling, dom)) {
         blockList.push(recognizeBlock(sibling))
@@ -155,9 +154,9 @@ var recognizeListBlock = (dom) => {
   }
   return recognizeListBlock(parent)
 }
-//需要加上属于第几个孩子a:nth-child(1)
-var recognizeListPath = (dom) => {
-  let getDomSelector=(dom)=>{
+// 需要加上属于第几个孩子a:nth-child(1)
+var recognizeListPath = dom => {
+  let getDomSelector = dom => {
     let tag = dom.tagName.toLowerCase()
     let className = dom.className
     let domSelector
@@ -168,102 +167,137 @@ var recognizeListPath = (dom) => {
     }
     return domSelector
   }
+
   let path = getDomSelector(dom)
-  let recognizeByPath = (dom) => {
+  let passList = Array.from(dom.parentNode.querySelectorAll(path))
+  let list = fontSizeSort(passList)
+  let title, fontSize
+  if (list && list.length) {
+    title = list[0]
+    fontSize = title.fontSize
+  } else {
+    console.log('no text')
+    return null
+  }
+  if (title != dom) {
+    path = getDomSelector(title)
+  }
+  console.log(path, fontSize, title)
+  let recognizeByPath = dom => {
     let parent = dom.parentNode
-    let parentPath=getDomSelector(parent)
-    path=`${parentPath}>${path}`
-    let list = document.querySelectorAll(path)
+    let parentPath = getDomSelector(parent)
+    path = `${parentPath}>${path}`
+    let list = Array.from(document.querySelectorAll(path))
     console.log(path, list)
+    if (list.length < 2) return null
     if (parent === document.body) {
       console.log('no sibling')
       return {
+        path,
         list,
-        path
+        fontSize
       }
     }
-    
-    if (isSibling(LIST, list[0], list[list.length - 1])) {
+    let last = list[list.length - 1]
+    if (isSibling(LIST, list[0], last)) {
       return {
+        path,
         list,
-        path
+        fontSize
+      }
+    } else if (passList.includes(list[0]) && passList.includes(last)) {
+      list = list.filter(item => {
+        return isSibling(LIST, item, title)
+      })
+      return {
+        path,
+        list,
+        fontSize
       }
     }
     return recognizeByPath(parent)
   }
-  return recognizeByPath(dom)
-}
-var recognizeListBlockByPath = (dom) => {
-  let parent = dom.parentNode
-  let tag = dom.tagName.toLowerCase()
-  if (parent === document.body) {
-    console.log('no sibling')
-    return null
-  }
-  let blockList = []
-  let siblings = Array.from(parent.children)
-  // 是否有兄弟
-  if (siblings.length > 1) {
-    for (var sibling of siblings) {
-      if (sibling.tagName.toLowerCase() !== tag) {
-        continue;
-      }
-      if (sibling === dom) {
-        blockList.push(recognizeBlock(sibling))
-        continue;
-      }
-      if (isSibling(LIST, sibling, dom)) {
-        blockList.push(recognizeBlock(sibling))
-      }
-    }
-    if (blockList.length > 1) {
-      return blockList
-    }
-  }
-  return recognizeListBlock(parent)
+  return recognizeByPath(title)
 }
 
-const recognizeTitle = (dom) => {
+const recognizeTitle = dom => {
   let children = dom.querySelectorAll('*')
   let list = fontSizeSort(children)
   if (list && list.length) return list[0]
   return null
 }
+// 降序排列
 const fontSizeRule = (text1, text2) => {
   let fontSize1 = parseInt(getstyle(text1, 'fontSize'))
   let fontSize2 = parseInt(getstyle(text2, 'fontSize'))
+  text1.fontSize = fontSize1
+  text2.fontSize = fontSize2
   if (fontSize1 == fontSize2) {
     return text1.innerText.length - text2.innerText.length
   }
   return fontSize2 - fontSize1
 }
-const fontSizeSort = (lists) => {
+const fontSizeSort = lists => {
   let linkList = []
   for (let list of lists) {
     if (list.innerText.trim()) linkList.push(list)
   }
-  linkList.sort(fontSizeRule)
+  if (linkList.length > 1) {
+    linkList.sort(fontSizeRule)
+  } else if (linkList.length == 1) {
+    linkList[0].fontSize = parseInt(getstyle(linkList[0], 'fontSize'))
+  }
+
   return linkList
 }
-const recognizeLink = (dom) => {
+const recognizeLink = dom => {
   let allLinks = dom.querySelectorAll('a')
   return fontSizeSort(allLinks)
 }
 var recognizeList = container => {
   let dom = container || document.body
-  let linkList = recognizeLink(dom)
+  let linkList = Array.from(dom.querySelectorAll('a'))
   let blockLists = []
   while (linkList.length > 1) {
-    //从字体最大的链接开始找
-    let maxLink = linkList.shift()
-    let blockList = recognizeListBlock(maxLink)
-    console.log(maxLink, blockList)
+    // 从顶部的链接开始找
+    let link = linkList.shift()
+    let blockList = recognizeListPath(link)
+    if (!blockList) continue
+    // 移除已经识别的链接
+    linkList = linkList.filter(item => {
+      return !blockList.list.includes(item)
+    })
+    console.log(link, blockList)
     blockLists.push(blockList)
   }
   return blockLists
 }
-export {
-  recognize,
-  recognizeListBlock,
-  recognizeList
+var recognizeNumList = container => {
+  let linkLists = recognizeList(container)
+  for (var linkList of linkLists) {
+    if (/[0-9一二三四五六七八九十零]/.test(linkList.list[0].innerText)) {
+      return linkList.list
+    }
+  }
+  return null
 }
+var recognizePageBtn = () => {}
+// var recognizeList = container => {
+//   let dom = container || document.body
+//   let linkList = recognizeLink(dom)
+//   let blockLists = []
+//   while (linkList.length > 1) {
+//     // 从字体最大的链接开始找
+//     let maxLink = linkList.shift()
+//     // let blockList = recognizeListBlock(maxLink)
+//     let blockList = recognizeListPath(maxLink)
+//     if (!blockList) continue
+//     linkList = linkList.filter(item => {
+//       return !blockList.list.includes(item)
+//     })
+//     console.log(maxLink, blockList)
+//     blockLists.push(blockList)
+//   }
+//   return blockLists
+// }
+export { recognize, recognizeListBlock, recognizeList }
