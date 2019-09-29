@@ -9,6 +9,7 @@ import { async } from 'rxjs/internal/scheduler/async';
 import { ITask } from '@/task/interfaces/task.interface';
 import { CreateTaskDto } from '@/task/dto/create-task.dto';
 import { TagService } from '@/tag/tag.service';
+// import { recognizeList, recognizePageBtn } from '@/util/recognize'
 
 @Injectable()
 export class CrawlerService {
@@ -76,9 +77,9 @@ export class CrawlerService {
             return crawlSourceRes
         } else if (source.crawlMore == 1) {
             //return crawlSourceRes
-            if(crawlSourceRes.list&&crawlSourceRes.list.length)
-            this.crwalPages(crawlSourceRes.list)
-            
+            if (crawlSourceRes.list && crawlSourceRes.list.length)
+                this.crwalPages(crawlSourceRes.list)
+
         }
 
     }
@@ -86,9 +87,9 @@ export class CrawlerService {
         try {
             await this.launchPage()
             let i = 0
-            let that =this
+            let that = this
             for (let url of urls) {
-                console.log('page:',url.link.href)
+                console.log('page:', url.link.href)
                 i++;
                 if (i > 3) break;
                 await that.page.goto(url.link.href, { waitUntil: 'networkidle0' })
@@ -106,6 +107,8 @@ export class CrawlerService {
     private async launchPage() {
         this.browser = await puppeteer.launch({
             //headless: false,
+            //避免Puppeteer被前端JS检测
+            ignoreDefaultArgs: ["--enable-automation"],
             executablePath: CHROME_PATH,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         })
@@ -116,6 +119,31 @@ export class CrawlerService {
             // for (let i = 0; i < msg.args().length; ++i)
             //     console.log(`${i}: ${msg.args()[i]}`);
         });
+    }
+    async crawlAndRecognize(url, rule) {
+        console.log('crawl url list')
+        await this.launchPage()
+        try {
+            await this.page.goto(url, { waitUntil: 'networkidle0' })
+            await this.page.addScriptTag({ path: './src/util/recognize.js' });
+            let results = await this.page.evaluate(rule => {
+                switch (rule) {
+                    case 'list':
+                        let recognizeList = (window as any).recognizeList
+                        return recognizeList();
+                    case 'numlist':
+                        return (window as any).recognizeNumList()
+                    case 'content':
+                        return (window as any).recognizeContent();
+                }
+            }, rule)
+            console.log(results)
+            return results
+        } catch (e) {
+            console.error(e)
+            await this.browser.close()
+            this.logger.log('error, close chrome')
+        }
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)

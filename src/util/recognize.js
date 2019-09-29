@@ -1,5 +1,5 @@
-var bodyChildren = Array.from(document.body.children)
-var stepResult = []
+// var bodyChildren = Array.from(document.body.children)
+// var stepResult = []
 const BODY = {
   WIDTH:
     window.innerWidth ||
@@ -13,7 +13,9 @@ const BODY = {
 const MAIN = {
   TAG: 'main',
   WIDTH: 0.5,
-  HEIGHT: 0.5
+  HEIGHT: 0.5,
+  TOP: 0.55,
+  LEFT: 0.33
 }
 const sizeRule = (rule, { width, height }, { WIDTH, HEIGHT } = BODY) => {
   if (width < WIDTH * rule.WIDTH || height < HEIGHT * rule.HEIGHT) {
@@ -26,11 +28,12 @@ const viweRule = (
   { offsetTop, offsetLeft },
   { WIDTH, HEIGHT } = BODY
 ) => {
-  if (offsetTop > HEIGHT * rule.HEIGHT || offsetLeft > WIDTH * rule.WIDTH) {
+  if (offsetTop > HEIGHT * rule.TOP || offsetLeft > WIDTH * rule.LEFT) {
     return false
   }
   return true
 }
+const textMostRule = () => {}
 
 const recognize = (rule, target, compTarget) => {
   let res = target || document.body
@@ -70,14 +73,14 @@ const recognize = (rule, target, compTarget) => {
   //   return recognize(rule, currentItem)
   // })
 }
-let mainContent = recognize(MAIN)
-console.log('mainContent', mainContent)
+// let mainContent = recognize(MAIN)
+// console.log('mainContent', mainContent)
 
 // 获取主要区域的链接，按路径XPATH?分类，数量最多，字体最大的即为列表，
 // 机器学习特征 字体大小 数量 是否在main
 
-let allLink = mainContent.querySelectorAll('a')
-let linkList
+// let allLink = mainContent.querySelectorAll('a')
+// let linkList
 // 是否兄弟
 const LIST = ['font', 'className']
 function getstyle (obj, key) {
@@ -275,13 +278,52 @@ var recognizeList = container => {
 var recognizeNumList = container => {
   let linkLists = recognizeList(container)
   for (var linkList of linkLists) {
-    if (/[0-9一二三四五六七八九十零]/.test(linkList.list[0].innerText)) {
-      return linkList.list
+    if (
+      /[0-9一二三四五六七八九十零]/.test(
+        linkList.list[parseInt(linkList.list.length / 2)].innerText
+      )
+    ) {
+      return linkList.list.map(item => {
+        return {
+          title: item.innerText,
+          href: item.href
+        }
+      })
     }
   }
   return null
 }
-var recognizePageBtn = () => {}
+var recognizePageBtn = () => {
+  let linkBtns = document.querySelectorAll('a')
+  let btns = []
+  let exep = [/上一/, /目录/, /下一/]
+  for (var linkBtn of linkBtns) {
+    for (var i = 0; i < exep.length; i++) {
+      if (exep[i].test(linkBtn.innerText)) {
+        btns.push(linkBtn)
+        console.log(exep[i], linkBtn)
+        exep.splice(i, 1)
+        continue
+      }
+    }
+    if (!exep.length) break
+  }
+  console.log(btns)
+  return btns.map(btn => {
+    return {
+      text: btn.innerText,
+      href: btn.href
+    }
+  })
+}
+var recognizeContent = () => {
+  let mainContent = recognize(MAIN)
+  let btns = recognizePageBtn()
+  return {
+    text: mainContent.innerText,
+    btns
+  }
+}
 // var recognizeList = container => {
 //   let dom = container || document.body
 //   let linkList = recognizeLink(dom)
@@ -300,4 +342,9 @@ var recognizePageBtn = () => {}
 //   }
 //   return blockLists
 // }
-export { recognize, recognizeListBlock, recognizeList }
+// module.exports = {
+//   recognize,
+//   recognizeListBlock,
+//   recognizeList,
+//   recognizePageBtn
+// }
