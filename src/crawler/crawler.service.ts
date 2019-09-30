@@ -20,15 +20,21 @@ export class CrawlerService {
         private readonly tagService: TagService) {
 
     }
-    private async init() {
-        //if (this.browser && this.page) return;
+    private async launchPage() {
         this.browser = await puppeteer.launch({
-            headless: true,
+            //headless: false,
+            //避免Puppeteer被前端JS检测
+            ignoreDefaultArgs: ["--enable-automation"],
             executablePath: CHROME_PATH,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         })
         this.logger.log('打开 chrome')
         this.page = await this.browser.newPage()
+        this.page.on('console', msg => {
+            console.log(msg.text())
+            // for (let i = 0; i < msg.args().length; ++i)
+            //     console.log(`${i}: ${msg.args()[i]}`);
+        });
     }
     //爬任务，爬多个源
     async crawl(taskDto) {
@@ -43,13 +49,6 @@ export class CrawlerService {
                 crawPromises.push(that.crawlSource(sources[i], taskDto, i))
             }
             return Promise.all(crawPromises)
-            // return await sources.forEach(
-            //     async (source, index) => {
-            //         await this.crawlSource(source, taskDto, index)
-            //     })
-            // await this.browser.close()
-            // //console.log(this.browser)
-            // this.logger.log('close chrome')
         }
         return await this.sourceService.findByIds(sourceIds)
             .then(crawlSources)
@@ -78,12 +77,12 @@ export class CrawlerService {
         } else if (source.crawlMore == 1) {
             //return crawlSourceRes
             if (crawlSourceRes.list && crawlSourceRes.list.length)
-                this.crwalPages(crawlSourceRes.list)
+                this.autoCrwalPagesByList(crawlSourceRes.list)
 
         }
 
     }
-    async crwalPages(urls) {
+    async autoCrwalPagesByList(urls) {
         try {
             await this.launchPage()
             let i = 0
@@ -92,8 +91,7 @@ export class CrawlerService {
                 console.log('page:', url.link.href)
                 i++;
                 if (i > 3) break;
-                await that.page.goto(url.link.href, { waitUntil: 'networkidle0' })
-                let content = await that.page.$eval('body', el => el.innerText)
+                let content = await that.crawlAndRecognize(url.link.href,'mainContent',true)
                 let tags = await that.tagService.getTags(content)
                 console.log(tags)
             }
@@ -104,30 +102,17 @@ export class CrawlerService {
             await this.browser.close()
         }
     }
-    private async launchPage() {
-        this.browser = await puppeteer.launch({
-            //headless: false,
-            //避免Puppeteer被前端JS检测
-            ignoreDefaultArgs: ["--enable-automation"],
-            executablePath: CHROME_PATH,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        })
-        this.logger.log('打开 chrome')
-        this.page = await this.browser.newPage()
-        this.page.on('console', msg => {
-            console.log(msg.text())
-            // for (let i = 0; i < msg.args().length; ++i)
-            //     console.log(`${i}: ${msg.args()[i]}`);
-        });
-    }
-    async crawlAndRecognize(url, rule) {
-        console.log('crawl url list')
-        await this.launchPage()
+    
+    async crawlAndRecognize(url, rule, isLaunch=false) {
+        console.log('crawl url list',url,rule)
+        if(!isLaunch) await this.launchPage()
         try {
             await this.page.goto(url, { waitUntil: 'networkidle0' })
             await this.page.addScriptTag({ path: './src/util/recognize.js' });
             let results = await this.page.evaluate(rule => {
                 switch (rule) {
+                    case 'mainContent':
+                        return (window as any).recognizeMainContent()
                     case 'list':
                         let recognizeList = (window as any).recognizeList
                         return recognizeList();

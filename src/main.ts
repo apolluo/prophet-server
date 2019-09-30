@@ -6,6 +6,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { TaskModule } from './task/task.module';
 import { StoreModule } from './store/store.module';
 import { from } from 'rxjs';
+declare const module: any;
 
 async function bootstrap() {
   // Create your regular nest application.
@@ -47,6 +48,11 @@ async function bootstrap() {
     .build();
   const storeDocument = SwaggerModule.createDocument(app, storeOptions, { include: [StoreModule] });
   SwaggerModule.setup('api/store', app, storeDocument);
+  
   await app.listen(8081);
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 }
 bootstrap();

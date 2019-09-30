@@ -33,7 +33,9 @@ const viweRule = (
   }
   return true
 }
-const textMostRule = () => {}
+const quantitySortRule = (a,b) => {
+  return b.list.length-a.list.length
+}
 
 const recognize = (rule, target, compTarget) => {
   let res = target || document.body
@@ -73,8 +75,13 @@ const recognize = (rule, target, compTarget) => {
   //   return recognize(rule, currentItem)
   // })
 }
-// let mainContent = recognize(MAIN)
-// console.log('mainContent', mainContent)
+var recognizeMainContent=()=>{
+  let mainContent = recognize(MAIN)
+  // console.log('mainContent', mainContent)
+  if(mainContent)return mainContent.innerText
+  return ''
+}
+
 
 // 获取主要区域的链接，按路径XPATH?分类，数量最多，字体最大的即为列表，
 // 机器学习特征 字体大小 数量 是否在main
@@ -176,6 +183,7 @@ var recognizeListPath = dom => {
   let list = fontSizeSort(passList)
   let title, fontSize
   if (list && list.length) {
+    console.log('compute font size, get the first',list)
     title = list[0]
     fontSize = title.fontSize
   } else {
@@ -203,6 +211,7 @@ var recognizeListPath = dom => {
     }
     let last = list[list.length - 1]
     if (isSibling(LIST, list[0], last)) {
+      console.log('find all sibling',path,fontSize,list)
       return {
         path,
         list,
@@ -212,6 +221,7 @@ var recognizeListPath = dom => {
       list = list.filter(item => {
         return isSibling(LIST, item, title)
       })
+      console.log('find all sibling by filter',path,fontSize,list)
       return {
         path,
         list,
@@ -253,6 +263,12 @@ const fontSizeSort = lists => {
 
   return linkList
 }
+const quantitySort=lists=>{
+  if(lists.length>1){
+    return lists.sort(quantitySortRule)
+  }
+  return lists
+}
 const recognizeLink = dom => {
   let allLinks = dom.querySelectorAll('a')
   return fontSizeSort(allLinks)
@@ -276,7 +292,8 @@ var recognizeList = container => {
   return blockLists
 }
 var recognizeNumList = container => {
-  let linkLists = recognizeList(container)
+  let linkLists =quantitySort(recognizeList(container)) 
+  console.log('get all linkLists',linkLists)
   for (var linkList of linkLists) {
     if (
       /[0-9一二三四五六七八九十零]/.test(
