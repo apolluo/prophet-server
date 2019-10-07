@@ -32,6 +32,7 @@
     "amqp-connection-manager": "^3.0.0",
     "amqplib": "^0.5.5",
     "compression": "^1.7.4",
+    "generic-pool": "^3.7.1",
     "global": "^4.4.0",
     "mongoose": "^5.7.1",
     "puppeteer": "^1.20.0",

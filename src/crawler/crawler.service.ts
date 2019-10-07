@@ -9,6 +9,7 @@ import { async } from 'rxjs/internal/scheduler/async';
 import { ITask } from '@/task/interfaces/task.interface';
 import { CreateTaskDto } from '@/task/dto/create-task.dto';
 import { TagService } from '@/tag/tag.service';
+import { PoolService } from '@/pool/pool.service';
 // import { recognizeList, recognizePageBtn } from '@/util/recognize'
 
 @Injectable()
@@ -17,7 +18,7 @@ export class CrawlerService {
     private browser
     private page
     constructor(private readonly sourceService: SourceService,
-        private readonly tagService: TagService) {
+        private readonly tagService: TagService, private readonly poolService: PoolService) {
 
     }
     private async launchPage() {
@@ -91,7 +92,7 @@ export class CrawlerService {
                 console.log('page:', url.link.href)
                 i++;
                 if (i > 3) break;
-                let content = await that.crawlAndRecognize(url.link.href,'mainContent',true)
+                let content = await that.crawlAndRecognize(url.link.href, 'mainContent', true)
                 let tags = await that.tagService.getTags(content)
                 console.log(tags)
             }
@@ -102,10 +103,10 @@ export class CrawlerService {
             await this.browser.close()
         }
     }
-    
-    async crawlAndRecognize(url, rule, isLaunch=false) {
-        console.log('crawl url list',url,rule)
-        if(!isLaunch) await this.launchPage()
+
+    async crawlAndRecognize(url, rule, isLaunch = false) {
+        console.log('crawl url list', url, rule)
+        if (!isLaunch) await this.launchPage()
         try {
             await this.page.goto(url, { waitUntil: 'networkidle0' })
             await this.page.addScriptTag({ path: './src/util/recognize.js' });

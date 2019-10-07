@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
-import * as  compression  from 'compression'
+import * as  compression from 'compression'
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { TaskModule } from './task/task.module';
@@ -48,11 +48,12 @@ async function bootstrap() {
     .build();
   const storeDocument = SwaggerModule.createDocument(app, storeOptions, { include: [StoreModule] });
   SwaggerModule.setup('api/store', app, storeDocument);
-  
+
   await app.listen(8081);
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
   }
+
 }
 bootstrap();

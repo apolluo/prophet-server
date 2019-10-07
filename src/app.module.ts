@@ -10,13 +10,15 @@ import { SourceModule } from './source/source.module';
 import { MongooseModule } from "@nestjs/mongoose";
 import { CrawlerModule } from './crawler/crawler.module';
 import { RuleModule } from './rule/rule.module';
+import { PoolModule } from './pool/pool.module';
 
 @Module({
   imports: [
     TaskModule, DbModule, StoreModule, TagModule, SourceModule,
     MongooseModule.forRoot('mongodb://root:123456@localhost/nest?authSource=admin'),
     CrawlerModule,
-    RuleModule
+    RuleModule,
+    PoolModule
   ],
   controllers: [AppController],
   providers: [AppService],

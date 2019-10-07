@@ -43,7 +43,9 @@ const initPuppeteerPool = (options = {}) => {
     },
     validate: instance => {
       // 执行一次自定义校验，并且校验校验 实例已使用次数。 当 返回 reject 时 表示实例不可用
-      return validator(instance).then(valid => Promise.resolve(valid && (maxUses <= 0 || instance.useCount < maxUses)))
+      return validator(instance).then(valid =>
+        Promise.resolve(valid && (maxUses <= 0 || instance.useCount < maxUses))
+      )
     }
   }
   const config = {
@@ -86,62 +88,55 @@ const initPuppeteerPool = (options = {}) => {
   }
   return pool
 }
+module.exports = initPuppeteerPool
+// 如何使用：
 
-//如何使用：
-const pool = initPuppeteerPool({ // 全局只应该被初始化一次
-    puppeteerArgs: {
-      ignoreHTTPSErrors: true,
-      headless: false, // 是否启用无头模式页面
-      timeout: 0,
-      pipe: true, // 不使用 websocket 
-    }
-})
 // 在业务中取出实例使用
-const page = await pool.use(instance=>{
-	const page = await instance.newPage()
-	await page.goto('http://xxx.xxx', { timeout: 120000 })
-	// do XXX ...
-    return page
-})
+// const page = await pool.use(instance=>{
+// 	const page = await instance.newPage()
+// 	await page.goto('http://xxx.xxx', { timeout: 120000 })
+// 	// do XXX ...
+//     return page
+// })
 // do XXX ...
 
 // 应该在服务重启或者关闭时执行
-//pool.drain().then(() => pool.clear()
+// pool.drain().then(() => pool.clear()
 
-//main
-const initPuppeteerPool = require('./util/puppeteer-pool')
-const { EventEmitter } = require('events')
-EventEmitter.defaultMaxListeners = 30
-class AppBootHook {
-  constructor(app) {
-    this.app = app
-  }
-  async didLoad() {
-    // 所有的配置已经加载完毕
-    // 可以用来加载应用自定义的文件，启动自定义的服务
-    this.app.pool = initPuppeteerPool()
-  }
-  async beforeClose() {
-    if (this.app.pool.drain) {
-      await this.app.pool.drain().then(() => this.app.pool.clear())
-    }
-  }
-}
-module.exports = AppBootHook
+// main
+// const initPuppeteerPool = require('./util/puppeteer-pool')
+// const { EventEmitter } = require('events')
+// EventEmitter.defaultMaxListeners = 30
+// class AppBootHook {
+//   constructor(app) {
+//     this.app = app
+//   }
+//   async didLoad() {
+//     // 所有的配置已经加载完毕
+//     // 可以用来加载应用自定义的文件，启动自定义的服务
+//     this.app.pool = initPuppeteerPool()
+//   }
+//   async beforeClose() {
+//     if (this.app.pool.drain) {
+//       await this.app.pool.drain().then(() => this.app.pool.clear())
+//     }
+//   }
+// }
+// module.exports = AppBootHook
 
-//server
-const Service = require('egg').Service
-class ScreenshotService extends Service {
-    renderPage(url) {
-        const { app, config } = this
-        const imageBuffer = await app.pool.use(async instance => {
-            // 1. 创建一个新窗口
-            const page = await instance.newPage()
-            await page.goto(url, { timeout: 120000 })
-            // 2. 截图参数，截图
-            const buf = await page.screenshot({ ...imgOutOption, clip: opt })
-            return buf
-        })
-        return imageBuffer
-    }
-}
+// server
+// const Service = require('egg').Service
+// class ScreenshotService extends Service {
+//     renderPage(url) {
+//         const { app, config } = this
+//         const imageBuffer = await app.pool.use(async instance => {
+//             // 1. 创建一个新窗口
+//             const page = await instance.newPage()
+//             await page.goto(url, { timeout: 120000 })
+//             // 2. 截图参数，截图
+//             const buf = await page.screenshot({ ...imgOutOption, clip: opt })
+//             return buf
+//         })
+//         return imageBuffer
+//     }
+// }
