@@ -85,7 +85,7 @@ export class CrawlerService {
     }
     async autoCrwalPagesByList(urls) {
         try {
-            await this.launchPage()
+            // await this.launchPage()
             let i = 0
             let that = this
             for (let url of urls) {
@@ -106,11 +106,16 @@ export class CrawlerService {
 
     async crawlAndRecognize(url, rule, isLaunch = false) {
         console.log('crawl url list', url, rule)
-        if (!isLaunch) await this.launchPage()
+        // if (!isLaunch) await this.launchPage()
         try {
-            await this.page.goto(url, { waitUntil: 'networkidle0' })
-            await this.page.addScriptTag({ path: './src/util/recognize.js' });
-            let results = await this.page.evaluate(rule => {
+            // await this.page.goto(url, { waitUntil: 'networkidle0' })
+            let page =  await this.poolService.pool.use(async instance=>{
+                const page = await instance.newPage()
+                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+                return page
+            })
+            await page.addScriptTag({ path: './src/util/recognize.js' });
+            let results = await page.evaluate(rule => {
                 switch (rule) {
                     case 'mainContent':
                         return (window as any).recognizeMainContent()
@@ -133,13 +138,18 @@ export class CrawlerService {
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
-        await this.launchPage()
+        //await this.launchPage()
         try {
-            await this.page.goto(url, { waitUntil: 'networkidle0' })
+            //await this.page.goto(url, { waitUntil: 'networkidle0' })
+            let page =  await this.poolService.pool.use(async instance=>{
+                const page = await instance.newPage()
+                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+                return page
+            })
             // DOM不能用外部函数处理
             // await this.page.exposeFunction('getPageInfo', this.getPageInfo)
             // await this.page.addScriptTag({ content: `${this.getPageInfo}`});
-            let results = await this.page.evaluate(rules => {
+            let results = await page.evaluate(rules => {
                 let pageInfo = {
                     name: 'root',
                     target: document,
@@ -285,8 +295,8 @@ export class CrawlerService {
             // console.log(tags)
             // let parseResults = this.getPageInfo(results)
             // console.log(parseResults)
-            await this.browser.close()
-            this.logger.log('close chrome')
+            // await this.browser.close()
+            // this.logger.log('close chrome')
             return results
         } catch (error) {
             console.error(error)

@@ -11,7 +11,7 @@ declare const module: any;
 async function bootstrap() {
   // Create your regular nest application.
   const app = await NestFactory.create(AppModule);
-
+  app.enableShutdownHooks();
   // Then combine it with a RabbitMQ microservice
   // const microservice = app.connectMicroservice({
   //   transport: Transport.RMQ,
@@ -50,6 +50,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/store', app, storeDocument);
 
   await app.listen(8081);
+  // process.kill(process.pid, 'SIGTERM');
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
