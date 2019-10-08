@@ -138,18 +138,21 @@ export class CrawlerService {
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
-        //await this.launchPage()
+        await this.launchPage()
         try {
-            //await this.page.goto(url, { waitUntil: 'networkidle0' })
-            let page =  await this.poolService.pool.use(async instance=>{
-                const page = await instance.newPage()
-                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
-                return page
-            })
+            await this.page.goto(url, { waitUntil: 'networkidle0' })
+            // console.log(this.poolService.pool.use)
+            // let page =  await this.poolService.pool.use(async instance=>{
+            //     console.log('instance',instance)
+            //     const page = await instance.newPage()
+            //     await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+            //     return page
+            // })
+            // console.log('new page')
             // DOM不能用外部函数处理
             // await this.page.exposeFunction('getPageInfo', this.getPageInfo)
             // await this.page.addScriptTag({ content: `${this.getPageInfo}`});
-            let results = await page.evaluate(rules => {
+            let results = await this.page.evaluate(rules => {
                 let pageInfo = {
                     name: 'root',
                     target: document,
@@ -295,14 +298,15 @@ export class CrawlerService {
             // console.log(tags)
             // let parseResults = this.getPageInfo(results)
             // console.log(parseResults)
-            // await this.browser.close()
-            // this.logger.log('close chrome')
+            
             return results
         } catch (error) {
             console.error(error)
-            await this.browser.close()
+            // await this.browser.close()
             this.logger.log('error, close chrome')
         } finally {
+            await this.browser.close()
+            this.logger.log('close chrome')
             // 最后要退出进程
             // process.exit(0)
         }

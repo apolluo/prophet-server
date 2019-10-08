@@ -22,6 +22,7 @@ export class PoolService implements OnApplicationShutdown,OnModuleDestroy,OnModu
         console.log('initPuppeteerPool', this.pool)
     }
     async onModuleInit(){
+        this.pool.start()
         console.log('OnModuleInit')
     }
     async onModuleDestroy(){
