@@ -15,10 +15,11 @@ const MAIN = {
   WIDTH: 0.5,
   HEIGHT: 0.5,
   TOP: 0.55,
-  LEFT: 0.33
+  LEFT: 0.33,
+  MIN_TXT: 20
 }
-const sizeRule = (rule, { width, height }, { WIDTH, HEIGHT } = BODY) => {
-  if (width < WIDTH * rule.WIDTH || height < HEIGHT * rule.HEIGHT) {
+const sizeRule = (rule, { width, height, txtLen }, { WIDTH, HEIGHT } = BODY) => {
+  if (width < WIDTH * rule.WIDTH || height < HEIGHT * rule.HEIGHT || txtLen < rule.MIN_TXT) {
     return false
   }
   return true
@@ -33,11 +34,12 @@ const viweRule = (
   }
   return true
 }
-const quantitySortRule = (a,b) => {
-  return b.list.length-a.list.length
+const quantitySortRule = (a, b) => {
+  return b.list.length - a.list.length
 }
 
-const recognize = (rule, target, compTarget) => {
+var recognize = (rule, target, compTarget) => {
+  console.log('recognize', target)
   let res = target || document.body
   if (rule.TAG) {
     let main = res.querySelector(rule.TAG)
@@ -60,7 +62,8 @@ const recognize = (rule, target, compTarget) => {
   currentRes = viewList.filter(item => {
     return sizeRule(rule, {
       width: item.offsetWidth || 0,
-      height: item.offsetHeight || 0
+      height: item.offsetHeight || 0,
+      txtLen: item.innerText.length
     })
   })
   console.log('currentRes', currentRes)
@@ -75,13 +78,12 @@ const recognize = (rule, target, compTarget) => {
   //   return recognize(rule, currentItem)
   // })
 }
-var recognizeMainContent=()=>{
+var recognizeMainContent = () => {
   let mainContent = recognize(MAIN)
   // console.log('mainContent', mainContent)
-  if(mainContent)return mainContent.innerText
+  if (mainContent) return mainContent.innerText
   return ''
 }
-
 
 // 获取主要区域的链接，按路径XPATH?分类，数量最多，字体最大的即为列表，
 // 机器学习特征 字体大小 数量 是否在main
@@ -183,7 +185,7 @@ var recognizeListPath = dom => {
   let list = fontSizeSort(passList)
   let title, fontSize
   if (list && list.length) {
-    console.log('compute font size, get the first',list)
+    console.log('compute font size, get the first', list)
     title = list[0]
     fontSize = title.fontSize
   } else {
@@ -211,7 +213,7 @@ var recognizeListPath = dom => {
     }
     let last = list[list.length - 1]
     if (isSibling(LIST, list[0], last)) {
-      console.log('find all sibling',path,fontSize,list)
+      console.log('find all sibling', path, fontSize, list)
       return {
         path,
         list,
@@ -221,7 +223,7 @@ var recognizeListPath = dom => {
       list = list.filter(item => {
         return isSibling(LIST, item, title)
       })
-      console.log('find all sibling by filter',path,fontSize,list)
+      console.log('find all sibling by filter', path, fontSize, list)
       return {
         path,
         list,
@@ -263,8 +265,8 @@ const fontSizeSort = lists => {
 
   return linkList
 }
-const quantitySort=lists=>{
-  if(lists.length>1){
+const quantitySort = lists => {
+  if (lists.length > 1) {
     return lists.sort(quantitySortRule)
   }
   return lists
@@ -292,8 +294,8 @@ var recognizeList = container => {
   return blockLists
 }
 var recognizeNumList = container => {
-  let linkLists =quantitySort(recognizeList(container)) 
-  console.log('get all linkLists',linkLists)
+  let linkLists = quantitySort(recognizeList(container))
+  console.log('get all linkLists', linkLists)
   for (var linkList of linkLists) {
     if (
       /[0-9一二三四五六七八九十零]/.test(
@@ -335,11 +337,29 @@ var recognizePageBtn = () => {
 }
 var recognizeContent = () => {
   let mainContent = recognize(MAIN)
+  let txtContent = recognizeTxtContent(mainContent)
   let btns = recognizePageBtn()
   return {
-    text: mainContent.innerText,
+    text: txtContent.innerText,
     btns
   }
+}
+var recognizeTxtContent = (dom) => {
+  let list = Array.from(dom.childNodes)
+  list = list.filter(item => {
+    return item.length > 0 || item.innerText.length > 0
+  })
+  if (list < 2) return dom
+  const totalLen = dom.innerText.length
+  for (var item of list) {
+    if (txtLenRule(item.length || item.innerText.length, totalLen)) {
+      return recognizeTxtContent(item)
+    }
+  }
+  return dom
+}
+const txtLenRule = (len, totalLen) => {
+  return len > (totalLen * 3 / 4)
 }
 // var recognizeList = container => {
 //   let dom = container || document.body

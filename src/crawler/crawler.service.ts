@@ -37,6 +37,13 @@ export class CrawlerService {
             //     console.log(`${i}: ${msg.args()[i]}`);
         });
     }
+    private async closePage(){
+        if(this.browser){
+            await this.browser.close()
+        }
+        this.browser=null
+        this.logger.log('关闭chrome')
+    }
     //爬任务，爬多个源
     async crawl(taskDto) {
         //await this.init()
@@ -96,11 +103,10 @@ export class CrawlerService {
                 let tags = await that.tagService.getTags(content)
                 console.log(tags)
             }
-            await this.browser.close()
-
+            await this.closePage()
         } catch (error) {
             console.log(error)
-            await this.browser.close()
+            await this.closePage()
         }
     }
 
@@ -114,7 +120,7 @@ export class CrawlerService {
                 await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
                 return page
             })
-            await page.addScriptTag({ path: './src/util/recognize.js' });
+            await page.addScriptTag({ path: './dist/util/recognize.js' });
             let results = await page.evaluate(rule => {
                 switch (rule) {
                     case 'mainContent':
@@ -138,21 +144,21 @@ export class CrawlerService {
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
-        await this.launchPage()
+        // await this.launchPage()
         try {
-            await this.page.goto(url, { waitUntil: 'networkidle0' })
+            // await this.page.goto(url, { waitUntil: 'networkidle0' })
             // console.log(this.poolService.pool.use)
-            // let page =  await this.poolService.pool.use(async instance=>{
-            //     console.log('instance',instance)
-            //     const page = await instance.newPage()
-            //     await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
-            //     return page
-            // })
-            // console.log('new page')
+            let page =  await this.poolService.pool.use(async instance=>{
+                console.log('instance',instance)
+                const page = await instance.newPage()
+                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+                return page
+            })
+            console.log('new page')
             // DOM不能用外部函数处理
             // await this.page.exposeFunction('getPageInfo', this.getPageInfo)
             // await this.page.addScriptTag({ content: `${this.getPageInfo}`});
-            let results = await this.page.evaluate(rules => {
+            let results = await page.evaluate(rules => {
                 let pageInfo = {
                     name: 'root',
                     target: document,
@@ -305,8 +311,7 @@ export class CrawlerService {
             // await this.browser.close()
             this.logger.log('error, close chrome')
         } finally {
-            await this.browser.close()
-            this.logger.log('close chrome')
+            await this.closePage()
             // 最后要退出进程
             // process.exit(0)
         }

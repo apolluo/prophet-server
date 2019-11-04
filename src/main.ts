@@ -49,7 +49,7 @@ async function bootstrap() {
   const storeDocument = SwaggerModule.createDocument(app, storeOptions, { include: [StoreModule] });
   SwaggerModule.setup('api/store', app, storeDocument);
 
-  await app.listen(8081);
+  await app.listen(8080);
   // process.kill(process.pid, 'SIGTERM');
   if (module.hot) {
     module.hot.accept();
