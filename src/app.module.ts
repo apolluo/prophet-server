@@ -11,11 +11,11 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { CrawlerModule } from './crawler/crawler.module';
 import { RuleModule } from './rule/rule.module';
 import { PoolModule } from './pool/pool.module';
-
+import {DATABASE_URI} from './config'
 @Module({
   imports: [
     TaskModule, DbModule, StoreModule, TagModule, SourceModule,
-    MongooseModule.forRoot('mongodb://root:123456@localhost/nest?authSource=admin'),
+    MongooseModule.forRoot(DATABASE_URI),
     CrawlerModule,
     RuleModule,
     PoolModule

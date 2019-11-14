@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { StoreController } from './store.controller';
-import { StoreProviders } from './store.providers';
-import { DbModule } from '../db/db.module';
+import { StoreSchema } from './schemas/store.sckema';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [DbModule],
-  providers: [StoreService,...StoreProviders],
+  imports: [MongooseModule.forFeature([
+    { name: 'Store', schema: StoreSchema }
+  ])],
+  providers: [StoreService],
   controllers: [StoreController]
 })
 export class StoreModule {}

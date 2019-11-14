@@ -37,6 +37,13 @@ export class CrawlerService {
             //     console.log(`${i}: ${msg.args()[i]}`);
         });
     }
+    private async closePage(){
+        if(this.browser){
+            await this.browser.close()
+        }
+        this.browser=null
+        this.logger.log('关闭chrome')
+    }
     //爬任务，爬多个源
     async crawl(taskDto) {
         //await this.init()
@@ -96,25 +103,25 @@ export class CrawlerService {
                 let tags = await that.tagService.getTags(content)
                 console.log(tags)
             }
-            await this.browser.close()
-
+            await this.closePage()
         } catch (error) {
             console.log(error)
-            await this.browser.close()
+            await this.closePage()
         }
     }
 
     async crawlAndRecognize(url, rule, isLaunch = false) {
         console.log('crawl url list', url, rule)
         // if (!isLaunch) await this.launchPage()
+        let page
         try {
             // await this.page.goto(url, { waitUntil: 'networkidle0' })
-            let page =  await this.poolService.pool.use(async instance=>{
+            page =  await this.poolService.pool.use(async instance=>{
                 const page = await instance.newPage()
                 await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
                 return page
             })
-            await page.addScriptTag({ path: './src/util/recognize.js' });
+            await page.addScriptTag({ path: './dist/util/recognize.js' });
             let results = await page.evaluate(rule => {
                 switch (rule) {
                     case 'mainContent':
@@ -129,30 +136,39 @@ export class CrawlerService {
                 }
             }, rule)
             console.log(results)
+            await page.close()
             return results
         } catch (e) {
             console.error(e)
-            await this.browser.close()
-            this.logger.log('error, close chrome')
+            if(page){
+               await page.close()
+               this.logger.log('error, close chrome')
+            } 
+            return {
+                error:'获取内容失败'
+            }
+            // await this.browser.close()
+            
         }
     }
     async crwalUrl(url, rules) {
         console.log('crawl url', url, rules)
-        await this.launchPage()
+        // await this.launchPage()
+        let page
         try {
-            await this.page.goto(url, { waitUntil: 'networkidle0' })
+            // await this.page.goto(url, { waitUntil: 'networkidle0' })
             // console.log(this.poolService.pool.use)
-            // let page =  await this.poolService.pool.use(async instance=>{
-            //     console.log('instance',instance)
-            //     const page = await instance.newPage()
-            //     await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
-            //     return page
-            // })
-            // console.log('new page')
+            page =  await this.poolService.pool.use(async instance=>{
+                console.log('instance',instance)
+                const page = await instance.newPage()
+                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+                return page
+            })
+            console.log('new page')
             // DOM不能用外部函数处理
             // await this.page.exposeFunction('getPageInfo', this.getPageInfo)
             // await this.page.addScriptTag({ content: `${this.getPageInfo}`});
-            let results = await this.page.evaluate(rules => {
+            let results = await page.evaluate(rules => {
                 let pageInfo = {
                     name: 'root',
                     target: document,
@@ -298,15 +314,21 @@ export class CrawlerService {
             // console.log(tags)
             // let parseResults = this.getPageInfo(results)
             // console.log(parseResults)
-            
+            await page.close()
             return results
         } catch (error) {
             console.error(error)
+            if(page){
+                await page.close()
+                this.logger.log('error, close chrome')
+             } 
             // await this.browser.close()
             this.logger.log('error, close chrome')
+            return {
+                error:'获取内容失败'
+            }
         } finally {
-            await this.browser.close()
-            this.logger.log('close chrome')
+            // await this.closePage()
             // 最后要退出进程
             // process.exit(0)
         }
