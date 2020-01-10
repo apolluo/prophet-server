@@ -12,13 +12,15 @@ import { CrawlerModule } from './crawler/crawler.module';
 import { RuleModule } from './rule/rule.module';
 import { PoolModule } from './pool/pool.module';
 import {DATABASE_URI} from './config'
+import { MsgModule } from './msg/msg.module';
 @Module({
   imports: [
     TaskModule, DbModule, StoreModule, TagModule, SourceModule,
     MongooseModule.forRoot(DATABASE_URI),
     CrawlerModule,
     RuleModule,
-    PoolModule
+    PoolModule,
+    MsgModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,12 +2,35 @@ import { ApiModelProperty } from '@nestjs/swagger';
 export class CreateStoreDto {
     //任务类型 1：抓包；2
     @ApiModelProperty()
-    readonly type: Number;
-    //任务状态 0：未执行；1：执行成功；-1：执行错误；
+    type: Number;
+    
     @ApiModelProperty()
-    readonly context: String;
+    name: String;
+
+    @ApiModelProperty()
+    title: String;
+
+    @ApiModelProperty()
+    author: String;
+
+    @ApiModelProperty()
+    des: String;
+
+    @ApiModelProperty()
+    children: [String]
+
+    @ApiModelProperty()
+    context: String;
+
     @ApiModelProperty()
     comefrom: String;
+
+    @ApiModelProperty()
+    comefromDomain:String;
+    
+    @ApiModelProperty()
+    comefromUrl: String;
+
     @ApiModelProperty()
     tags: [String]
 }

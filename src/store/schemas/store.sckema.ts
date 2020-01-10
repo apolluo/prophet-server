@@ -8,13 +8,18 @@ import * as mongoose from 'mongoose';
 
 
 export const StoreSchema = new mongoose.Schema({
-    //内容类型 1：文字；2：html格式；3：josn；4：图片；5：url; 6:array
+    //context类型 1：文字；2：html格式；3：josn；4：图片；5：url; 6:本地
     type: Number,
-    title:String,
-    des:String,
-    children:[{type:mongoose.Schema.Types.ObjectId,ref:'Store'}],
-    context: String ,
-    comefrom: String,
+    //名称 
+    name: String,
+    title: String,
+    author: String,
+    des: String,
+    children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Store' }],
+    context: String,
+    comefrom:String,
+    comefromDomain:String,
+    comefromUrl: String,
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }]
 }, {
     collection: 'store', versionKey: false, timestamps: true

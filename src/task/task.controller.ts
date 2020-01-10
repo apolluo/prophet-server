@@ -20,7 +20,7 @@ export class TaskController {
         this.taskService.create(createTaskDto).then(
             (res) => {
                 console.log(res)
-                return this.crawlerService.crawl(createTaskDto)
+                // return this.crawlerService.crawl(createTaskDto)
             }
         ).catch((e) => { console.log('error', e) })
 

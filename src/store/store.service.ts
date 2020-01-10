@@ -1,10 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IStore } from './interfaces/store.interface';
 @Injectable()
 export class StoreService {
     constructor(
-        @Inject('STORE_MODEL')
+        @InjectModel('Store')
         private readonly StoreModel:Model<IStore>
     ){}
     async create(createStoreDto){

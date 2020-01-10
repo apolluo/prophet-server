@@ -161,7 +161,7 @@ export class CrawlerService {
             page =  await this.poolService.pool.use(async instance=>{
                 console.log('instance',instance)
                 const page = await instance.newPage()
-                await page.goto(url, {waitUntil: 'networkidle0', timeout: 120000 })
+                await page.goto(url, {waitUntil: 'networkidle0', timeout: 12000 })
                 return page
             })
             console.log('new page')
