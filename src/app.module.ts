@@ -13,6 +13,8 @@ import { RuleModule } from './rule/rule.module';
 import { PoolModule } from './pool/pool.module';
 import {DATABASE_URI} from './config'
 import { MsgModule } from './msg/msg.module';
+import { HandleService } from './handler/handler.service';
+import { HandleModule } from './handler/handler.module';
 @Module({
   imports: [
     TaskModule, DbModule, StoreModule, TagModule, SourceModule,
@@ -20,9 +22,10 @@ import { MsgModule } from './msg/msg.module';
     CrawlerModule,
     RuleModule,
     PoolModule,
-    MsgModule
+    MsgModule,
+    HandleModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, HandleService],
 })
 export class AppModule { }

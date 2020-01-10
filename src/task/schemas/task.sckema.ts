@@ -35,6 +35,7 @@ export const TaskSchema = new mongoose.Schema({
     searchWd: String,
     //任务状态 0：未执行；1：执行成功；-1：执行错误；
     status: Number,
+    handler:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Handler' }],
     //子任务
     subTask:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
     //任务是否结束
